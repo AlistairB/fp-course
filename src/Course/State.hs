@@ -138,8 +138,12 @@ findM ::
   (a -> f Bool)
   -> List a
   -> f (Optional a)
-findM =
-  error "todo: Course.State#findM"
+findM _ Nil = pure Empty
+findM f (x :. xs) =
+  let fb = (f x)
+  in  fb >>= \b -> case b of
+                     True -> pure (Full x)
+                     False -> findM f xs
 
 -- | Find the first element in a `List` that repeats.
 -- It is possible that no element repeats, hence an `Optional` result.
@@ -148,12 +152,17 @@ findM =
 --
 -- prop> case firstRepeat xs of Empty -> let xs' = hlist xs in nub xs' == xs'; Full x -> length (filter (== x) xs) > 1
 -- prop> case firstRepeat xs of Empty -> True; Full x -> let (l, (rx :. rs)) = span (/= x) xs in let (l2, r2) = span (/= x) rs in let l3 = hlist (l ++ (rx :. Nil) ++ l2) in nub l3 == l3
+-- TODO use findM and State
 firstRepeat ::
   Ord a =>
   List a
   -> Optional a
-firstRepeat =
-  error "todo: Course.State#firstRepeat"
+firstRepeat zs = go Nil zs
+  where
+    go _ Nil = Empty
+    go xs (y :. ys) = case elem y xs of
+                         True -> Full y
+                         False -> go (y :. xs) ys
 
 -- | Remove all duplicate elements in a `List`.
 -- /Tip:/ Use `filtering` and `State` with a @Data.Set#Set@.
@@ -161,12 +170,17 @@ firstRepeat =
 -- prop> firstRepeat (distinct xs) == Empty
 --
 -- prop> distinct xs == distinct (flatMap (\x -> x :. x :. Nil) xs)
+-- TODO use filtering and State
 distinct ::
   Ord a =>
   List a
   -> List a
-distinct =
-  error "todo: Course.State#distinct"
+distinct zs = go Nil zs
+  where
+    go xs Nil = xs
+    go xs (y :. ys) = case elem y xs of
+                         True -> go xs ys
+                         False -> go (y :. xs) ys
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1
@@ -189,8 +203,15 @@ distinct =
 --
 -- >>> isHappy 44
 -- True
+-- CHEAT - Copied. Seemed very algorithmic and not that useful to figure out..
 isHappy ::
   Integer
   -> Bool
 isHappy =
-  error "todo: Course.State#isHappy"
+  contains 1 .
+    firstRepeat .
+    produce (toInteger .
+             sum .
+             map (join (*) .
+                  digitToInt) .
+             show')
