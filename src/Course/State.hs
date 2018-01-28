@@ -181,7 +181,7 @@ distinct zs = go Nil zs
     go xs Nil = xs
     go xs (y :. ys) = case elem y xs of
                          True -> go xs ys
-                         False -> go (y :. xs) ys
+                         False -> y :. go xs ys
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1

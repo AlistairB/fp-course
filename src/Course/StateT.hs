@@ -173,12 +173,17 @@ putT s = StateT $ const $ pure ((), s)
 -- /Tip:/ Use `filtering` and `State'` with a @Data.Set#Set@.
 --
 -- prop> distinct' xs == distinct' (flatMap (\x -> x :. x :. Nil) xs)
+-- CHEAT - I've looked at the answers and they are horribly complex.. I'm not sure the value of shoehorning this into state?
 distinct' ::
   (Ord a, Num a) =>
   List a
   -> List a
-distinct' =
-  error "todo: Course.StateT#distinct'"
+distinct' = go Nil
+  where
+    go xs Nil = xs
+    go xs (y :. ys) = case elem y xs of
+                         True -> go xs ys
+                         False -> go (y :. xs) ys
 
 -- | Remove all duplicate elements in a `List`.
 -- However, if you see a value greater than `100` in the list,
@@ -195,8 +200,13 @@ distinctF ::
   (Ord a, Num a) =>
   List a
   -> Optional (List a)
-distinctF =
-  error "todo: Course.StateT#distinctF"
+distinctF = go Nil
+  where
+    go xs Nil = Full xs
+    go xs (y :. ys)
+      | y > 100    = Empty
+      | elem y xs  = go xs ys
+      | otherwise  = go (xs ++ y :. Nil) ys
 
 -- | An `OptionalT` is a functor of an `Optional` value.
 data OptionalT f a =
@@ -210,8 +220,11 @@ data OptionalT f a =
 -- >>> runOptionalT $ (+1) <$> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty]
 instance Functor f => Functor (OptionalT f) where
-  (<$>) =
-    error "todo: Course.StateT (<$>)#instance (OptionalT f)"
+  (<$>) f (OptionalT fa) = OptionalT $ (applyMaybe f) <$> fa
+
+applyMaybe :: (a -> b) -> Optional a -> Optional b
+applyMaybe _ Empty = Empty
+applyMaybe f (Full a) = Full (f a)
 
 -- | Implement the `Applicative` instance for `OptionalT f` given a Applicative f.
 --
