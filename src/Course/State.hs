@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Course.State where
 
@@ -64,7 +65,7 @@ get = State $ \s -> (s, s)
 put ::
   s
   -> State s ()
-put s = State $ \_ -> ((), s)
+put s = State $ const ((), s)
 
 -- | Implement the `Functor` instance for `State s`.
 --
@@ -140,10 +141,10 @@ findM ::
   -> f (Optional a)
 findM _ Nil = pure Empty
 findM f (x :. xs) =
-  let fb = (f x)
-  in  fb >>= \b -> case b of
-                     True -> pure (Full x)
-                     False -> findM f xs
+  let fb = f x
+  in  fb >>= \case
+                True -> pure (Full x)
+                False -> findM f xs
 
 -- | Find the first element in a `List` that repeats.
 -- It is possible that no element repeats, hence an `Optional` result.
@@ -157,7 +158,7 @@ firstRepeat ::
   Ord a =>
   List a
   -> Optional a
-firstRepeat zs = go Nil zs
+firstRepeat = go Nil
   where
     go _ Nil = Empty
     go xs (y :. ys) = case elem y xs of

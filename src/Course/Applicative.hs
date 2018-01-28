@@ -143,7 +143,7 @@ instance Applicative ((->) t) where
     ((->) t (a -> b))
     -> ((->) t a)
     -> ((->) t b)
-  (<*>) tab ta = \t -> (tab t) (ta t)
+  (<*>) tab ta t = tab t (ta t)
 
 
 -- | Apply a binary function in the environment.
@@ -259,7 +259,7 @@ lift4 fabcde fa fb fc fe = fabcde <$> fa <*> fb <*> fc <*> fe
   f a
   -> f b
   -> f b
-(*>) fa fb = (flip const) <$> fa <*> fb
+(*>) fa fb = flip const <$> fa <*> fb
 
 -- | Apply, discarding the value of the second argument.
 -- Pronounced, left apply.
@@ -338,7 +338,7 @@ replicateA c fa = go c fa (pure Nil)
         True -> fas
         False ->
           let thisRound = (:.) <$> fa' <*> fas
-              recurseResult = (go (c' - 1) fa' fas)
+              recurseResult = go (c' - 1) fa' fas
           in  (++) <$> thisRound <*> recurseResult
 
 
@@ -378,10 +378,10 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering f xs = (foldRight appendOnlyFull Nil) <$> (sequence ((go f) <$> xs))
+filtering f xs = foldRight appendOnlyFull Nil <$> sequence (go f <$> xs)
   where
     go :: Applicative f => (a -> f Bool) -> a -> f (Optional a)
-    go f' x' = (maybeValue x') <$> (f' x')
+    go f' x' = maybeValue x' <$> f' x'
 
 -----------------------
 -- SUPPORT LIBRARIES --

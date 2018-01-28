@@ -124,7 +124,7 @@ map ::
   -> List a
   -> List b
 map _ Nil = Nil
-map f (x :. xs) = f x :. (map f xs)
+map f (x :. xs) = f x :. map f xs
 
 -- | Return elements satisfying the given predicate.
 --
@@ -143,8 +143,8 @@ filter ::
 filter _ Nil = Nil
 filter f (x :. xs) =
   case f x of
-    True -> x :. (filter f xs)
-    False -> (filter f xs)
+    True -> x :. filter f xs
+    False -> filter f xs
 
 
 -- | Append two lists to a new list.
@@ -178,7 +178,7 @@ infixr 5 ++
 -- prop> sum (map length x) == length (flatten x)
 flatten :: List (List a) -> List a
 flatten Nil = Nil
-flatten (x :. xs) = x ++ (flatten xs)
+flatten (x :. xs) = x ++ flatten xs
 
 -- | Map a function then flatten to a list.
 --
@@ -195,7 +195,7 @@ flatMap ::
   -> List a
   -> List b
 flatMap _ Nil = Nil
-flatMap f (x :. xs) = f x ++ (flatMap f xs)
+flatMap f (x :. xs) = f x ++ flatMap f xs
 
 -- | Flatten a list of lists to a list (again).
 -- HOWEVER, this time use the /flatMap/ function that you just wrote.
@@ -292,7 +292,7 @@ lengthGT4 = go 0
 reverse ::
   List a
   -> List a
-reverse xs = go Nil xs
+reverse = go Nil
   where
     go ys Nil       = ys
     go ys (z :. zs) = go (z :. ys) zs

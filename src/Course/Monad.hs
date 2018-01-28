@@ -71,7 +71,7 @@ instance Monad ((->) t) where
     (a -> ((->) t b))
     -> ((->) t a)
     -> ((->) t b)
-  (=<<) fatb fta = \t -> fatb (fta t) t
+  (=<<) fatb fta t = fatb (fta t) t
 
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --
@@ -158,7 +158,7 @@ infixl 1 >>=
   -> (a -> f b)
   -> a
   -> f c
-(<=<) bfc afb a = (afb a) >>= bfc
+(<=<) bfc afb a = afb a >>= bfc
 
 infixr 1 <=<
 
