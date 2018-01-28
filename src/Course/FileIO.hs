@@ -116,7 +116,9 @@ getFile filePath = do
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles files = sequence_ $ uncurry printFile <$> files
+printFiles files = do
+  sequence $ uncurry printFile <$> files
+  pure ()
 
 -- Given the file name, and file contents, print them.
 -- Use @putStrLn@.
