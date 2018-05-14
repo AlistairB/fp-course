@@ -75,6 +75,15 @@ headOr :: a -> List a -> a
 headOr a Nil = a
 headOr _ (x :. _) = x
 
+headPls :: List a -> a
+headPls Nil = error "zomg no head"
+headPls (x :. _) = x
+
+tailPls :: List a -> List a
+tailPls Nil = error "zomg no tail"
+tailPls (_ :. xs) = xs
+
+
 -- | The product of the elements of a list.
 --
 -- >>> product Nil

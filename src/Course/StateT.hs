@@ -308,4 +308,4 @@ distinctG ::
   (Integral a, Show a) =>
   List a
   -> Logger Chars (Optional (List a))
-distinctG zs = undefined
+distinctG = undefined
