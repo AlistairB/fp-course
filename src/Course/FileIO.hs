@@ -37,6 +37,9 @@ Problem --
   each line of that file contains the name of another file,
   read the referenced file and print out its name and contents.
 
+Consideration --
+  Try to avoid repetition. Factor out any common expressions.
+  
 Example --
 Given file files.txt, containing:
   a.txt
@@ -76,31 +79,24 @@ the contents of c
 
 -}
 
--- /Tip:/ use @getArgs@ and @run@
-main ::
-  IO ()
-main = do
-  filePaths <- getArgs
-  case filePaths of
-    (x :. _) -> run x
-    Nil -> pure ()
-
--- Given a file name, read it and for each line in that file, read and print contents of each.
--- Use @getFiles@ and @printFiles@.
-run ::
+-- Given the file name, and file contents, print them.
+-- Use @putStrLn@.
+printFile ::
   FilePath
+  -> Chars
   -> IO ()
-run filePath = do
-  filesPointers <- lines <$> readFile filePath
-  files <- getFiles filesPointers
-  printFiles files
+printFile = do
+  putStrLn $ "Printing for file: " ++ filePath
+  putStrLn contents
 
--- Given a list of file names, return list of (file name and file contents).
--- Use @getFile@.
-getFiles ::
-  List FilePath
-  -> IO (List (FilePath, Chars))
-getFiles filePaths = sequence $ getFile <$> filePaths
+-- Given a list of (file name and file contents), print each.
+-- Use @printFile@.
+printFiles ::
+  List (FilePath, Chars)
+  -> IO ()
+printFiles = do
+  sequence $ uncurry printFile <$> files
+  pure ()
 
 -- Given a file name, return (file name and file contents).
 -- Use @readFile@.
@@ -111,21 +107,34 @@ getFile filePath = do
   contents <- readFile filePath
   pure (filePath, contents)
 
--- Given a list of (file name and file contents), print each.
--- Use @printFile@.
-printFiles ::
-  List (FilePath, Chars)
-  -> IO ()
-printFiles files = do
-  sequence $ uncurry printFile <$> files
-  pure ()
+-- Given a list of file names, return list of (file name and file contents).
+-- Use @getFile@.
+getFiles ::
+  List FilePath
+  -> IO (List (FilePath, Chars))
+getFiles = sequence $ getFile <$> filePaths
 
--- Given the file name, and file contents, print them.
--- Use @putStrLn@.
-printFile ::
+-- Given a file name, read it and for each line in that file, read and print contents of each.
+-- Use @getFiles@ and @printFiles@.
+run ::
   FilePath
-  -> Chars
   -> IO ()
-printFile filePath contents = do
-  putStrLn $ "Printing for file: " ++ filePath
-  putStrLn contents
+run = do
+  filesPointers <- lines <$> readFile filePath
+  files <- getFiles filesPointers
+  printFiles files
+
+-- /Tip:/ use @getArgs@ and @run@
+main ::
+  IO ()
+main = do
+  filePaths <- getArgs
+  case filePaths of
+    (x :. _) -> run x
+    Nil -> pure ()
+----
+
+-- Was there was some repetition in our solution?
+-- ? `sequence . (<$>)`
+-- ? `void . sequence . (<$>)`
+-- Factor it out.
