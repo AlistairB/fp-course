@@ -1,15 +1,15 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE RebindableSyntax    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RebindableSyntax #-}
 
 module Course.FileIO where
 
-import Course.Core
-import Course.Applicative
-import Course.Monad
-import Course.Functor
-import Course.List
+import           Course.Applicative
+import           Course.Core
+import           Course.Functor
+import           Course.List
+import           Course.Monad
 
 {-
 
@@ -39,7 +39,7 @@ Problem --
 
 Consideration --
   Try to avoid repetition. Factor out any common expressions.
-  
+
 Example --
 Given file files.txt, containing:
   a.txt
@@ -85,7 +85,7 @@ printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile = do
+printFile filePath contents = do
   putStrLn $ "Printing for file: " ++ filePath
   putStrLn contents
 
@@ -94,7 +94,7 @@ printFile = do
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles = do
+printFiles files = do
   sequence $ uncurry printFile <$> files
   pure ()
 
@@ -112,14 +112,14 @@ getFile filePath = do
 getFiles ::
   List FilePath
   -> IO (List (FilePath, Chars))
-getFiles = sequence $ getFile <$> filePaths
+getFiles filePaths = sequence $ getFile <$> filePaths
 
 -- Given a file name, read it and for each line in that file, read and print contents of each.
 -- Use @getFiles@ and @printFiles@.
 run ::
   FilePath
   -> IO ()
-run = do
+run filePath = do
   filesPointers <- lines <$> readFile filePath
   files <- getFiles filesPointers
   printFiles files
@@ -131,7 +131,7 @@ main = do
   filePaths <- getArgs
   case filePaths of
     (x :. _) -> run x
-    Nil -> pure ()
+    Nil      -> pure ()
 ----
 
 -- Was there was some repetition in our solution?

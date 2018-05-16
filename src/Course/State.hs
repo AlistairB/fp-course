@@ -1,19 +1,19 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE LambdaCase          #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
+{-# LANGUAGE RebindableSyntax    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE RebindableSyntax #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Course.State where
 
-import Course.Core
-import qualified Prelude as P
-import Course.Optional
-import Course.List
-import Course.Functor
-import Course.Applicative
-import Course.Monad
-import qualified Data.Set as S
+import           Course.Applicative
+import           Course.Core
+import           Course.Functor
+import           Course.List
+import           Course.Monad
+import           Course.Optional
+import qualified Data.Set           as S
+import qualified Prelude            as P
 
 -- $setup
 -- >>> import Test.QuickCheck.Function
@@ -157,12 +157,17 @@ firstRepeat ::
   Ord a =>
   List a
   -> Optional a
-firstRepeat = go Nil
-  where
-    go _ Nil = Empty
-    go xs (y :. ys) = case elem y xs of
-                         True -> Full y
-                         False -> go (y :. xs) ys
+firstRepeat xs = eval (findM isInSet xs) S.empty
+
+isInSet :: Ord a => a -> State (S.Set a) Bool
+isInSet a = get >>= \s -> if S.member a s then pure True else State (\_ -> (False, S.insert a s))
+
+-- firstRepeat = go Nil
+--   where
+--     go _ Nil = Empty
+--     go xs (y :. ys) = case elem y xs of
+--                         True  -> Full y
+--                         False -> go (y :. xs) ys
 
 -- | Remove all duplicate elements in a `List`.
 -- /Tip:/ Use `filtering` and `State` with a @Data.Set#Set@.
@@ -174,12 +179,17 @@ distinct ::
   Ord a =>
   List a
   -> List a
-distinct zs = go Nil zs
-  where
-    go xs Nil = xs
-    go xs (y :. ys) = case elem y xs of
-                         True -> go xs ys
-                         False -> y :. go xs ys
+distinct zs = eval (filtering isDistinct xs) S.empty
+
+isDistinct :: Ord a => a -> State (S.Set a) Bool
+isDistinct a = get >>= \s -> if S.notMember a s then pure True else State (\_ -> (False, S.insert a s))
+
+-- distinct zs = go Nil zs
+--  where
+--    go xs Nil = xs
+--    go xs (y :. ys) = case elem y xs of
+--                         True  -> go xs ys
+--                         False -> y :. go xs ys
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1

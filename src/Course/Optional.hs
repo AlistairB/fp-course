@@ -1,13 +1,13 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Course.Optional where
 
 import qualified Control.Applicative as A
-import qualified Control.Monad as M
-import Course.Core
-import qualified Prelude as P
-import Data.Maybe
+import qualified Control.Monad       as M
+import           Course.Core
+import           Data.Maybe
+import qualified Prelude             as P
 
 -- | The `Optional` data type contains 0 or 1 value.
 --
@@ -28,7 +28,7 @@ mapOptional ::
   (a -> b)
   -> Optional a
   -> Optional b
-mapOptional _ Empty = Empty
+mapOptional _ Empty    = Empty
 mapOptional f (Full a) = Full $ f a
 
 -- | Bind the given function on the possible value.
@@ -45,7 +45,7 @@ bindOptional ::
   (a -> Optional b)
   -> Optional a
   -> Optional b
-bindOptional _ Empty = Empty
+bindOptional _ Empty    = Empty
 bindOptional f (Full a) = f a
 
 -- | Return the possible value if it exists; otherwise, the second argument.
@@ -59,7 +59,7 @@ bindOptional f (Full a) = f a
   Optional a
   -> a
   -> a
-(??) Empty a = a
+(??) Empty a    = a
 (??) (Full b) _ = b
 
 -- | Try the first optional for a value. If it has a value, use it; otherwise,
@@ -81,10 +81,7 @@ bindOptional f (Full a) = f a
   -> Optional a
   -> Optional a
 (<+>) a@(Full _) _ = a
-(<+>) _ b = b
-
-zomg :: Ord a => Maybe a -> Maybe a -> Maybe a
-zomg _ (Just a) _
+(<+>) _ b          = b
 
 applyOptional :: Optional (a -> b) -> Optional a -> Optional b
 applyOptional f a = bindOptional (\f' -> mapOptional f' a) f
@@ -93,12 +90,12 @@ twiceOptional :: (a -> b -> c) -> Optional a -> Optional b -> Optional c
 twiceOptional f = applyOptional . mapOptional f
 
 contains :: Eq a => a -> Optional a -> Bool
-contains _ Empty = False
+contains _ Empty    = False
 contains a (Full z) = a == z
 
 fromFull :: Optional a -> a
 fromFull (Full a) = a
-fromFull _ = error "zomg called fromFull with Empty"
+fromFull _        = error "zomg called fromFull with Empty"
 
 instance P.Functor Optional where
   fmap =
