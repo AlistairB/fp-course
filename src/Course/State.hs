@@ -179,10 +179,10 @@ distinct ::
   Ord a =>
   List a
   -> List a
-distinct zs = eval (filtering isDistinct xs) S.empty
+distinct xs = eval (filtering isDistinct xs) S.empty
 
 isDistinct :: Ord a => a -> State (S.Set a) Bool
-isDistinct a = get >>= \s -> if S.notMember a s then pure True else State (\_ -> (False, S.insert a s))
+isDistinct a = get >>= \s -> if S.member a s then pure False else State (\_ -> (True, S.insert a s))
 
 -- distinct zs = go Nil zs
 --  where
